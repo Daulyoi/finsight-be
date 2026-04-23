@@ -27,8 +27,8 @@ export class Transaction {
   @Column({ type: 'timestamp' })
   timestamp!: Date;
 
-  @Column({ default: false })
-  is_anomaly: boolean = false;
+  @Column({ default: 0 })
+  anomaly_score: number = 0;
 
   @Column({ name: 'user_id' })
   userId!: string;
