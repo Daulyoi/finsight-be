@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
+import { ChatSessionsModule } from './modules/chat-sessions/chat-sessions.module';
+import { ChatMessagesModule } from './modules/chat-messages/chat-messages.module';
 
 @Module({
   imports: [
@@ -28,6 +31,9 @@ import { UsersModule } from './modules/users/users.module';
       },
     }),
     UsersModule,
+    TransactionsModule,
+    ChatSessionsModule,
+    ChatMessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
