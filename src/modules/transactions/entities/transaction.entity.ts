@@ -1,39 +1,85 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { Rekening } from '../../accounts/entities/account.entity';
+import { MccMap } from '../../mcc_map/entities/mcc_map.entity';
 
-@Entity('transactions')
-export class Transaction {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+@Entity('transaksi')
+export class Transaksi {
+  @PrimaryColumn({ name: 'id_transaksi', type: 'varchar', length: 255 })
+  idTransaksi!: string;
 
-  @Column('decimal', { precision: 12, scale: 2 })
-  amount!: number;
+  @Column({ name: 'id_rekening', type: 'varchar', length: 255, nullable: false })
+  idRekening!: string;
 
-  @Column()
-  merchant!: string;
+  @ManyToOne(() => Rekening, (rekening) => rekening.transaksis, {
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'id_rekening' })
+  rekening!: Rekening;
 
-  @Column()
-  category!: string;
-
-  @Column()
-  subcategory!: string;
-
-  @Column({ type: 'timestamp' })
+  @Column({ name: 'timestamp', type: 'timestamp', nullable: false })
   timestamp!: Date;
 
-  @Column({ default: 0 })
-  anomaly_score: number = 0;
+  @Column({ name: 'tipe_mutasi', type: 'varchar', length: 255, nullable: false })
+  tipeMutasi!: string;
 
-  @Column({ name: 'user_id' })
-  userId!: string;
+  @Column({ name: 'deskripsi_mutasi', type: 'varchar', length: 255, nullable: true })
+  deskripsiMutasi!: string | null;
 
-  @ManyToOne(() => User, (user) => user.transactions, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user!: User;
+  @Column({ name: 'catatan_mutasi', type: 'varchar', length: 255, nullable: true })
+  catatanMutasi!: string | null;
+
+  @Column({ name: 'id_mcc', type: 'varchar', length: 255, nullable: true })
+  idMcc!: string | null;
+
+  @ManyToOne(() => MccMap, (mccMap) => mccMap.transaksis, {
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'id_mcc' })
+  mccMap!: MccMap | null;
+
+  @Column({ name: 'nominal', type: 'bigint', nullable: false })
+  nominal!: string;
+
+  @Column({ name: 'sisa_saldo', type: 'bigint', nullable: false })
+  sisaSaldo!: string;
+
+  @Column({ name: 'label_anomali', type: 'boolean', nullable: false })
+  labelAnomali!: boolean;
+
+  @Column({ name: 'bulan', type: 'date', nullable: false })
+  bulan!: Date;
+
+  @Column({ name: 'hari_bulan', type: 'date', nullable: false })
+  hariBulan!: Date;
+
+  @Column({ name: 'hari_minggu', type: 'date', nullable: false })
+  hariMinggu!: Date;
+
+  @Column({ name: 'jam', type: 'time', nullable: false })
+  jam!: string;
+
+  @Column({ name: 'menit', type: 'time', nullable: false })
+  menit!: string;
+
+  @Column({ name: 'hour_sin', type: 'varchar', length: 255, nullable: true })
+  hourSin!: string | null;
+
+  @Column({ name: 'hour_cos', type: 'varchar', length: 255, nullable: true })
+  hourCos!: string | null;
+
+  @Column({ name: 'month_sin', type: 'varchar', length: 255, nullable: true })
+  monthSin!: string | null;
+
+  @Column({ name: 'month_cos', type: 'varchar', length: 255, nullable: true })
+  monthCos!: string | null;
 }

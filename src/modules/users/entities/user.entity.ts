@@ -1,58 +1,41 @@
-// entities/user.entity.ts
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { Transaction } from '../../transactions/entities/transaction.entity';
-import { ChatSession } from '../../chat-sessions/entities/chat-session.entity';
+import { Rekening } from '../../accounts/entities/account.entity';
+import { SejarahPersona } from '../../persona_history/entities/persona_history.entity';
 
-export type PersonaType = 'spendthrift' | 'balanced' | 'tightwad';
+@Entity('nasabah')
+export class Nasabah {
+  @PrimaryColumn({ name: 'id_nasabah', type: 'varchar', length: 255 })
+  idNasabah!: string;
 
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @Column({ name: 'nama_nasabah', type: 'varchar', length: 255, nullable: false })
+  namaNasabah!: string;
 
-  @Column({ unique: true })
-  email!: string;
+  @Column({ name: 'tanggal_lahir', type: 'date', nullable: false })
+  tanggalLahir!: Date;
 
-  @Column({ name: 'full_name' })
-  fullName!: string;
+  @Column({ name: 'nama_ibu_kandung', type: 'varchar', length: 255, nullable: false })
+  namaIbuKandung!: string;
 
-  @Column({
-    name: 'monthly_income',
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    nullable: true,
-  })
-  monthlyIncome: number = 0;
+  @Column({ name: 'segmen_demografi', type: 'varchar', length: 255, nullable: true })
+  segmenDemografi!: string | null;
 
-  @Column({
-    name: 'savings_goal',
-    type: 'decimal',
-    precision: 12,
-    scale: 2,
-    nullable: true,
-  })
-  savingsGoal: number = 0;
+  @Column({ name: 'gaji_bulanan', type: 'bigint', nullable: true })
+  gajiBulanan!: string | null;
 
-  @Column({ name: 'persona_type', type: 'varchar', nullable: true })
-  personaType!: PersonaType;
+  @Column({ name: 'persona_dasar', type: 'varchar', length: 255, nullable: true })
+  personaDasar!: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+  @Column({ name: 'is_dynamic', type: 'boolean', nullable: false })
+  isDynamic!: boolean;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+  @OneToMany(() => Rekening, (rekening) => rekening.nasabah)
+  rekenings!: Rekening[];
 
-  @OneToMany(() => Transaction, (transaction) => transaction.user)
-  transactions!: Transaction[];
-
-  @OneToMany(() => ChatSession, (session) => session.user)
-  chatSessions!: ChatSession[];
+  @OneToMany(() => SejarahPersona, (sejarahPersona) => sejarahPersona.nasabah)
+  sejarahPersonas!: SejarahPersona[];
 }

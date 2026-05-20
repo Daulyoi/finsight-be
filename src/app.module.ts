@@ -5,8 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
-import { ChatSessionsModule } from './modules/chat-sessions/chat-sessions.module';
-import { ChatMessagesModule } from './modules/chat-messages/chat-messages.module';
+import { AccountsModule } from './modules/accounts/accounts.module';
+import { PersonaHistoryModule } from './modules/persona_history/persona_history.module';
+import { MccMapModule } from './modules/mcc_map/mcc_map.module';
 
 @Module({
   imports: [
@@ -32,10 +33,11 @@ import { ChatMessagesModule } from './modules/chat-messages/chat-messages.module
     }),
     UsersModule,
     TransactionsModule,
-    ChatSessionsModule,
-    ChatMessagesModule,
+    AccountsModule,
+    PersonaHistoryModule,
+    MccMapModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

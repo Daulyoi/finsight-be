@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ChatSessionsService } from './chat-sessions.service';
+import { MccMapService } from './mcc_map.service';
 
-describe('ChatSessionsService', () => {
-  let service: ChatSessionsService;
+describe('MccMapService', () => {
+  let service: MccMapService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ChatSessionsService],
+      providers: [MccMapService],
     }).compile();
 
-    service = module.get<ChatSessionsService>(ChatSessionsService);
+    service = module.get<MccMapService>(MccMapService);
   });
 
   it('should be defined', () => {
