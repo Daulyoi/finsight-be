@@ -1,34 +1,82 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Nasabah } from './entities/user.entity';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  async getMe(@CurrentUser() user: Nasabah) {
+    const ratios = await this.usersService.getFinancialRatios(user.idNasabah);
+    return {
+      idNasabah: user.idNasabah,
+      namaNasabah: user.namaNasabah,
+      email: user.email,
+      tanggalLahir: user.tanggalLahir,
+      segmenDemografi: user.segmenDemografi,
+      gajiBulanan: user.gajiBulanan,
+      personaDasar: user.personaDasar,
+      isDynamic: user.isDynamic,
+      needsPercentage: ratios.needsPercentage,
+      wantsPercentage: ratios.wantsPercentage,
+      savingsPercentage: ratios.savingsPercentage,
+      remainingCashPercentage: ratios.remainingCashPercentage,
+    };
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Patch('me')
+  @HttpCode(HttpStatus.OK)
+  async updateMe(
+    @CurrentUser() user: Nasabah,
+    @Body() updateDto: UpdateUserDto,
+  ) {
+    const updatedUser = await this.usersService.updateNasabah(
+      user.idNasabah,
+      updateDto,
+    );
+    const ratios = await this.usersService.getFinancialRatios(updatedUser.idNasabah);
+    return {
+      idNasabah: updatedUser.idNasabah,
+      namaNasabah: updatedUser.namaNasabah,
+      email: updatedUser.email,
+      tanggalLahir: updatedUser.tanggalLahir,
+      segmenDemografi: updatedUser.segmenDemografi,
+      gajiBulanan: updatedUser.gajiBulanan,
+      personaDasar: updatedUser.personaDasar,
+      isDynamic: updatedUser.isDynamic,
+      needsPercentage: ratios.needsPercentage,
+      wantsPercentage: ratios.wantsPercentage,
+      savingsPercentage: ratios.savingsPercentage,
+      remainingCashPercentage: ratios.remainingCashPercentage,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Get('me/dashboard')
+  @HttpCode(HttpStatus.OK)
+  async getMeDashboard(@CurrentUser() user: Nasabah) {
+    const ratios = await this.usersService.getFinancialRatios(user.idNasabah);
+    return {
+      personaDasar: user.personaDasar,
+      needsPercentage: ratios.needsPercentage,
+      wantsPercentage: ratios.wantsPercentage,
+      savingsPercentage: ratios.savingsPercentage,
+      remainingCashPercentage: ratios.remainingCashPercentage,
+      currentMonth: ratios.currentMonth,
+    };
   }
 }

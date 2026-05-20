@@ -8,6 +8,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { PersonaHistoryModule } from './modules/persona_history/persona_history.module';
 import { MccMapModule } from './modules/mcc_map/mcc_map.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { MccMapModule } from './modules/mcc_map/mcc_map.module';
     AccountsModule,
     PersonaHistoryModule,
     MccMapModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

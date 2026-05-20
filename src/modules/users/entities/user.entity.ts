@@ -33,6 +33,15 @@ export class Nasabah {
   @Column({ name: 'is_dynamic', type: 'boolean', nullable: false })
   isDynamic!: boolean;
 
+  @Column({ name: 'email', type: 'varchar', length: 255, unique: true, nullable: false })
+  email!: string;
+
+  @Column({ name: 'password', type: 'varchar', length: 255, nullable: false })
+  password!: string;
+
+  @Column({ name: 'current_hashed_refresh_token', type: 'varchar', length: 255, nullable: true })
+  currentHashedRefreshToken!: string | null;
+
   @OneToMany(() => Rekening, (rekening) => rekening.nasabah)
   rekenings!: Rekening[];
 
