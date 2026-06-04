@@ -15,7 +15,7 @@
 * **2.1 Transaction module:** POST `/transactions`, MCC detection branch, raw text classification via FastAPI NLP.
 * **2.2 FastAPI HTTP client:** Axios-based HttpService wrapper under `src/integrations` with retry logic, timeouts, and fallbacks.
 * **2.3 Wants/Needs ratio updater:** Service to recalculate & update user balance and live ratios per transaction.
-* **2.4 Notification module:** Trigger push notifications after ratio updates (FCM using saved `fcmToken`).
+* **2.4 Notification module:** Save in-app notification logs after ratio updates.
 * **2.5 MCC mapping table:** Seed script for `mcc_map` -> category lookup, fall back to FastAPI NLP if unmapped.
 
 ### Phase 3: Schedulers & Reports
@@ -67,7 +67,6 @@ Entities conform exactly to the physical database ERD with necessary additions f
   * `email` (VARCHAR(255) UNIQUE NOT NULL)
   * `password` (VARCHAR(255) NOT NULL) - BCrypt hash
   * `current_hashed_refresh_token` (VARCHAR(255) NULLABLE)
-  * `fcm_token` (VARCHAR(255) NULLABLE) - Push notification token
 
 ### 3.2 `rekening` (Account Entity)
 * `id_rekening` (VARCHAR(255) PK) - Unique account identifier
@@ -445,11 +444,6 @@ Payloads and responses utilize standard camelCase matching the NestJS implementa
 ---
 
 ### 5.5 Notifications Module (JWT Required)
-
-**`POST /notifications/token`**
-* **Description:** Registers the FCM token for notification delivery.
-* **Body Requirements:** `{ "token": "string", "platform": "ios | android" }`
-* **Response (201):** `{ "message": "token registered" }`
 
 **`GET /notifications`**
 * **Description:** Returns in-app notification history and marks them as read.
