@@ -83,4 +83,28 @@ export class UsersController {
       currentMonth: ratios.currentMonth,
     };
   }
+
+  @Get('me/dashboard/monthly-summary')
+  @HttpCode(HttpStatus.OK)
+  async getMonthlySummary(@CurrentUser() user: Nasabah) {
+    return this.usersService.getMonthlySummary(user.idNasabah);
+  }
+
+  @Get('me/dashboard/daily-spending')
+  @HttpCode(HttpStatus.OK)
+  async getDailySpending(@CurrentUser() user: Nasabah) {
+    return this.usersService.getDailySpendingStats(user.idNasabah);
+  }
+
+  @Get('me/dashboard/cumulative-flow')
+  @HttpCode(HttpStatus.OK)
+  async getCumulativeFlow(@CurrentUser() user: Nasabah) {
+    return this.usersService.getCumulativeFlow(user.idNasabah);
+  }
+
+  @Get('me/dashboard/category-breakdown')
+  @HttpCode(HttpStatus.OK)
+  async getCategoryBreakdown(@CurrentUser() user: Nasabah) {
+    return this.usersService.getCategoryBreakdown(user.idNasabah);
+  }
 }

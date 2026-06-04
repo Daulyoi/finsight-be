@@ -127,4 +127,127 @@ export class UsersService {
       },
     };
   }
+
+  async getMonthlySummary(userId: string, accessDate: Date = new Date()) {
+    const accessDateStr = accessDate.toISOString();
+    const query = `
+      SELECT 
+          r.id_nasabah as "idNasabah",
+          DATE_TRUNC('month', t.timestamp) AS bulan,
+          COALESCE(SUM(CASE WHEN t.tipe_mutasi = 'Kredit' THEN t.nominal ELSE 0 END), 0) AS total_income,
+          COALESCE(SUM(CASE WHEN t.tipe_mutasi = 'Debit' THEN t.nominal ELSE 0 END), 0) AS total_spending,
+          COALESCE(AVG(CASE WHEN t.tipe_mutasi = 'Kredit' THEN t.nominal END), 0) AS avg_income_per_trx,
+          COALESCE(AVG(CASE WHEN t.tipe_mutasi = 'Debit' THEN t.nominal END), 0) AS avg_spending_per_trx
+      FROM transaksi t
+      INNER JOIN rekening r ON r.id_rekening = t.id_rekening
+      WHERE r.id_nasabah = $1
+      AND t.timestamp <= CAST($2 AS TIMESTAMP)
+      GROUP BY r.id_nasabah, DATE_TRUNC('month', t.timestamp)
+      ORDER BY 2 DESC;
+    `;
+    const result = await this.dataSource.query(query, [userId, accessDateStr]);
+    return result.map(row => ({
+      bulan: row.bulan,
+      totalIncome: parseFloat(row.total_income) || 0,
+      totalSpending: parseFloat(row.total_spending) || 0,
+      avgIncomePerTrx: parseFloat(row.avg_income_per_trx) || 0,
+      avgSpendingPerTrx: parseFloat(row.avg_spending_per_trx) || 0,
+    }));
+  }
+
+  async getDailySpendingStats(userId: string, accessDate: Date = new Date()) {
+    const accessDateStr = accessDate.toISOString();
+    const query = `
+      WITH month_stats AS (
+          SELECT 
+              COALESCE(SUM(CASE WHEN t.tipe_mutasi = 'Kredit' THEN t.nominal ELSE 0 END), 0) AS total_income,
+              COALESCE(SUM(CASE WHEN t.tipe_mutasi = 'Debit' THEN t.nominal ELSE 0 END), 0) AS total_spending,
+              COALESCE(COUNT(DISTINCT DATE(t.timestamp)), 0) AS days_active
+          FROM transaksi t
+          INNER JOIN rekening r ON r.id_rekening = t.id_rekening
+          WHERE r.id_nasabah = $1
+          AND t.timestamp >= DATE_TRUNC('month', CAST($2 AS TIMESTAMP))
+          AND t.timestamp <= CAST($2 AS TIMESTAMP)
+      )
+      SELECT 
+          COALESCE(total_spending::numeric / NULLIF(days_active, 0), 0) AS avg_daily_spending,
+          COALESCE((total_spending::numeric / NULLIF(days_active, 0)) / NULLIF(total_income, 0) * 100, 0) AS daily_spending_to_income_ratio
+      FROM month_stats;
+    `;
+    const result = await this.dataSource.query(query, [userId, accessDateStr]);
+    if (result && result.length > 0) {
+      return {
+        avgDailySpending: parseFloat(result[0].avg_daily_spending) || 0,
+        dailySpendingToIncomeRatio: parseFloat(result[0].daily_spending_to_income_ratio) || 0,
+      };
+    }
+    return {
+      avgDailySpending: 0,
+      dailySpendingToIncomeRatio: 0,
+    };
+  }
+
+  async getCumulativeFlow(userId: string, accessDate: Date = new Date()) {
+    const accessDateStr = accessDate.toISOString();
+    const query = `
+      SELECT 
+          t.timestamp as timestamp,
+          t.tipe_mutasi AS tipe_mutasi,
+          t.nominal AS nominal,
+          COALESCE(SUM(CASE WHEN t.tipe_mutasi = 'Debit' THEN t.nominal ELSE 0 END) 
+              OVER (PARTITION BY r.id_nasabah, DATE_TRUNC('month', t.timestamp) ORDER BY t.timestamp), 0) AS cumulative_spending,
+          COALESCE(SUM(CASE WHEN t.tipe_mutasi = 'Kredit' THEN t.nominal ELSE 0 END) 
+              OVER (PARTITION BY r.id_nasabah, DATE_TRUNC('month', t.timestamp) ORDER BY t.timestamp), 0) AS cumulative_income
+      FROM transaksi t
+      INNER JOIN rekening r ON r.id_rekening = t.id_rekening
+      WHERE r.id_nasabah = $1
+      AND t.timestamp >= DATE_TRUNC('month', CAST($2 AS TIMESTAMP))
+      AND t.timestamp <= CAST($2 AS TIMESTAMP)
+      ORDER BY t.timestamp ASC;
+    `;
+    const result = await this.dataSource.query(query, [userId, accessDateStr]);
+    return result.map(row => ({
+      timestamp: row.timestamp,
+      tipeMutasi: row.tipe_mutasi,
+      nominal: parseFloat(row.nominal) || 0,
+      cumulativeSpending: parseFloat(row.cumulative_spending) || 0,
+      cumulativeIncome: parseFloat(row.cumulative_income) || 0,
+    }));
+  }
+
+  async getCategoryBreakdown(userId: string, accessDate: Date = new Date()) {
+    const accessDateStr = accessDate.toISOString();
+    const query = `
+      WITH category_totals AS (
+          SELECT 
+              t.kategori_detail AS kategori_detail,
+              SUM(t.nominal) AS total_amount
+          FROM transaksi t
+          INNER JOIN rekening r ON r.id_rekening = t.id_rekening
+          WHERE r.id_nasabah = $1
+          AND t.tipe_mutasi = 'Debit'
+          AND t.timestamp >= DATE_TRUNC('month', CAST($2 AS TIMESTAMP))
+          AND t.timestamp <= CAST($2 AS TIMESTAMP)
+          GROUP BY t.kategori_detail
+      ),
+      ranked_categories AS (
+          SELECT 
+              kategori_detail,
+              total_amount,
+              ROW_NUMBER() OVER (ORDER BY total_amount DESC) as rank
+          FROM category_totals
+      )
+      SELECT 
+          CASE WHEN rank <= 3 THEN COALESCE(kategori_detail, 'Lainnya') ELSE 'Lainnya' END AS category,
+          SUM(total_amount) AS amount
+      FROM ranked_categories
+      GROUP BY 1
+      ORDER BY 2 DESC;
+    `;
+    const result = await this.dataSource.query(query, [userId, accessDateStr]);
+    return result.map(row => ({
+      category: row.category,
+      amount: parseFloat(row.amount) || 0,
+    }));
+  }
 }
