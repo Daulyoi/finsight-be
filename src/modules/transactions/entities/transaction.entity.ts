@@ -82,4 +82,10 @@ export class Transaksi {
 
   @Column({ name: 'month_cos', type: 'varchar', length: 255, nullable: true })
   monthCos!: string | null;
+
+  @Column({ name: 'kategori_besar', type: 'varchar', length: 255, nullable: true })
+  kategoriBesar!: string | null;
+
+  @Column({ name: 'kategori_detail', type: 'varchar', length: 255, nullable: true })
+  kategoriDetail!: string | null;
 }

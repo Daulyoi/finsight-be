@@ -21,6 +21,14 @@ export class UsersService {
     return this.nasabahRepository.findOne({ where: { email } });
   }
 
+  async getUserBalance(userId: string): Promise<number> {
+    const result = await this.dataSource.query(
+      `SELECT COALESCE(SUM(saldo), 0) as balance FROM rekening WHERE id_nasabah = $1`,
+      [userId],
+    );
+    return Number(result[0]?.balance || 0);
+  }
+
   async createNasabah(data: Partial<Nasabah>): Promise<Nasabah> {
     const nasabah = this.nasabahRepository.create(data);
     return this.nasabahRepository.save(nasabah);

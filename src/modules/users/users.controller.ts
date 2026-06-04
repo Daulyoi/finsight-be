@@ -23,6 +23,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async getMe(@CurrentUser() user: Nasabah) {
     const ratios = await this.usersService.getFinancialRatios(user.idNasabah);
+    const balance = await this.usersService.getUserBalance(user.idNasabah);
     return {
       idNasabah: user.idNasabah,
       namaNasabah: user.namaNasabah,
@@ -32,6 +33,7 @@ export class UsersController {
       gajiBulanan: user.gajiBulanan,
       personaDasar: user.personaDasar,
       isDynamic: user.isDynamic,
+      balance,
       needsPercentage: ratios.needsPercentage,
       wantsPercentage: ratios.wantsPercentage,
       savingsPercentage: ratios.savingsPercentage,
@@ -50,6 +52,7 @@ export class UsersController {
       updateDto,
     );
     const ratios = await this.usersService.getFinancialRatios(updatedUser.idNasabah);
+    const balance = await this.usersService.getUserBalance(updatedUser.idNasabah);
     return {
       idNasabah: updatedUser.idNasabah,
       namaNasabah: updatedUser.namaNasabah,
@@ -59,6 +62,7 @@ export class UsersController {
       gajiBulanan: updatedUser.gajiBulanan,
       personaDasar: updatedUser.personaDasar,
       isDynamic: updatedUser.isDynamic,
+      balance,
       needsPercentage: ratios.needsPercentage,
       wantsPercentage: ratios.wantsPercentage,
       savingsPercentage: ratios.savingsPercentage,

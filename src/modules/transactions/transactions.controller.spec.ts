@@ -6,9 +6,22 @@ describe('TransactionsController', () => {
   let controller: TransactionsController;
 
   beforeEach(async () => {
+    const mockTransactionsService = {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      findOne: jest.fn(),
+      update: jest.fn(),
+      remove: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TransactionsController],
-      providers: [TransactionsService],
+      providers: [
+        {
+          provide: TransactionsService,
+          useValue: mockTransactionsService,
+        },
+      ],
     }).compile();
 
     controller = module.get<TransactionsController>(TransactionsController);
