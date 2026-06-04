@@ -103,6 +103,9 @@ export class TransactionsService {
     // Fetch updated financial ratios
     const ratios = await this.usersService.getFinancialRatios(userId);
 
+    // Save ratios to user record as per alur-transaksi-nasabah
+    await this.usersService.updateUserRatios(userId, ratios.needsPercentage, ratios.wantsPercentage);
+
     return {
       transaction: savedTx,
       updatedRatios: ratios,

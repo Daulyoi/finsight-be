@@ -59,6 +59,13 @@ export class UsersService {
     });
   }
 
+  async updateUserRatios(userId: string, needs: number, wants: number): Promise<void> {
+    await this.nasabahRepository.update(userId, {
+      currentRatioNeeds: needs,
+      currentRatioWants: wants,
+    });
+  }
+
   async getFinancialRatios(userId: string, accessDate: Date = new Date()) {
     const accessDateStr = accessDate.toISOString();
 

@@ -42,6 +42,12 @@ export class Nasabah {
   @Column({ name: 'current_hashed_refresh_token', type: 'varchar', length: 255, nullable: true })
   currentHashedRefreshToken!: string | null;
 
+  @Column({ name: 'current_ratio_needs', type: 'numeric', precision: 5, scale: 2, default: 0 })
+  currentRatioNeeds!: number;
+
+  @Column({ name: 'current_ratio_wants', type: 'numeric', precision: 5, scale: 2, default: 0 })
+  currentRatioWants!: number;
+
   @OneToMany(() => Rekening, (rekening) => rekening.nasabah)
   rekenings!: Rekening[];
 
